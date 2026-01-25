@@ -40,8 +40,8 @@ PORT=8080 HOST=127.0.0.1 python app.py
 
 The application can be configured using the following environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `HOST`   | `0.0.0.0` | Bind address |
-| `PORT`   | `5000`    | Port to listen on |
+| Variable | Default   | Description      |
+|----------|-----------|------------------|
+| `HOST`   | `0.0.0.0` | Bind address     |
+| `PORT`   | `5001`    | Port to listen on |
 | `DEBUG`  | `False`   | Enable debug mode |
