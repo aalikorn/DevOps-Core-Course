@@ -37,18 +37,23 @@ For this lab, I chose **FastAPI**.
 - **Description**: Health check endpoint.
 - **Response**: `{"status": "healthy", "timestamp": "...", "uptime_seconds": ...}`
 
-## Testing Evidence
+### Testing Evidence
 
 To verify the application, I ran it locally and tested the endpoints.
 
+**Screenshots:**
+- ![Main Endpoint](screenshots/01-main-endpoint.png)
+- ![Health Check](screenshots/02-health-check.png)
+- ![Formatted Output](screenshots/03-formatted-output.png)
+
 ### Terminal Output
 ```bash
-$ python app.py
-2026-01-25 12:30:00 - __main__ - INFO - Starting server on 0.0.0.0:5000
-INFO:     Started server process [1234]
+$ python3 app.py
+2026-01-25 12:40:01,122 - __main__ - INFO - Starting server on 0.0.0.0:5001
+INFO:     Started server process [57379]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://0.0.0.0:5001 (Press CTRL+C to quit)
 ```
 
 ## Challenges & Solutions
