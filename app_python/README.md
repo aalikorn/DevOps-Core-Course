@@ -45,3 +45,23 @@ The application can be configured using the following environment variables:
 | `HOST`   | `0.0.0.0` | Bind address     |
 | `PORT`   | `5001`    | Port to listen on |
 | `DEBUG`  | `False`   | Enable debug mode |
+
+## Docker
+
+### Building the Image Locally
+
+```bash
+docker build -t <your-username>/app_python:latest ./app_python
+```
+
+### Running a Container
+
+```bash
+docker run -d -p 5001:5001 --name app_python_container <your-username>/app_python:latest
+```
+
+### Pulling from Docker Hub
+
+```bash
+docker pull <your-username>/app_python:latest
+```
