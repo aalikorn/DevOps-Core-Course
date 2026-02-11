@@ -51,6 +51,10 @@ The workflow is triggered on push and pull requests to the `main` branch, exclus
 **Versioning Strategy:**
 I use Semantic Versioning (SemVer) tags derived from git tags (e.g., `v1.0.0`) and fallback to commit SHA for non-tagged commits. This ensures every build is uniquely identifiable and traceable.
 
+**CI Workflow Run:**
+[Link to successful run](https://github.com/aalikorn/DevOps-Core-Course/actions/runs/21925130463)
+![alt text](image-1.png)
+
 ## Task 3: CI Best Practices & Security
 
 1.  **Status Badges**: Added to `README.md` to show immediate pipeline status.
