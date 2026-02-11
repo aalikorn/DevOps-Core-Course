@@ -1,5 +1,9 @@
 # DevOps Info Service (Python)
 
+![Python CI](https://github.com/dashanikolaeva/DevOps-Core-Course/actions/workflows/python-ci.yml/badge.svg)
+[![codecov](https://codecov.io/gh/dashanikolaeva/DevOps-Core-Course/graph/badge.svg?token=YOUR_TOKEN)](https://codecov.io/gh/dashanikolaeva/DevOps-Core-Course)
+
+
 A simple web application build with FastAPI that reports system information and health status.
 
 ## Overview
