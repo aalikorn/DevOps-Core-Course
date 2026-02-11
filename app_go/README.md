@@ -1,5 +1,8 @@
 # DevOps Info Service (Go)
 
+![Go CI](https://github.com/dashanikolaeva/DevOps-Core-Course/actions/workflows/go-ci.yml/badge.svg)
+
+
 A simple web application built with Go's standard library (`net/http`) that reports system information and health status.
 
 ## Overview
