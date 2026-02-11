@@ -58,7 +58,9 @@ I use Semantic Versioning (SemVer) tags derived from git tags (e.g., `v1.0.0`) a
 ## Task 3: CI Best Practices & Security
 
 1.  **Status Badges**: Added to `README.md` to show immediate pipeline status.
+![alt text](image-2.png)
 2.  **Dependency Caching**: configured in `actions/setup-python` using `cache: 'pip'`. This significantly reduces build time by reusing downloaded packages.
+![alt text](image-3.png)
 3.  **Security Scanning**: Integrated `bandit` for static analysis and `Snyk` for dependency vulnerability scanning.
 4.  **Path Filtering**: Workflows only run when relevant files change, saving CI minutes and preventing redundant builds in a monorepo structure.
 
