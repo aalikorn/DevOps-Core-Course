@@ -106,7 +106,7 @@ async def internal_server_error_handler(request: Request, exc: Exception):
 if __name__ == "__main__":
     import uvicorn
     
-    HOST = os.getenv('HOST', '0.0.0.0')
+    HOST = os.getenv('HOST', '0.0.0.0')  # nosec B104
     PORT = int(os.getenv('PORT', 5001))
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     
