@@ -1,0 +1,10 @@
+# Pulumi state metadata
+Pulumi.*.yaml
+
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Local secrets and config
+.pulumi/

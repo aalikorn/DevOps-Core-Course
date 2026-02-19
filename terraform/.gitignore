@@ -1,0 +1,16 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform plugins and cache
+.terraform/
+.terraform.lock.hcl
+
+# Local variable files
+terraform.tfvars
+*.tfvars
+
+# Credential files
+*.json
+*.pem
+*.key
