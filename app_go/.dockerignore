@@ -1,0 +1,17 @@
+# Git
+.git
+.gitignore
+
+# Go
+bin/
+main
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+.dockerignore
