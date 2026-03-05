@@ -1,0 +1,81 @@
+---
+# Common role - System provisioning with blocks and tags (Lab 6 Task 1)
+
+- name: Install and configure common packages
+  block:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install common packages
+      apt:
+        name: "{{ common_packages }}"
+        state: present
+        update_cache: yes
+
+  rescue:
+    - name: Handle apt cache update failure
+      debug:
+        msg: "Initial apt update failed, attempting fix..."
+
+    - name: Fix missing packages
+      command: apt-get update --fix-missing
+      changed_when: false
+
+    - name: Retry package installation
+      apt:
+        name: "{{ common_packages }}"
+        state: present
+
+  always:
+    - name: Log package installation completion
+      copy:
+        content: "Common packages installed at {{ ansible_date_time.iso8601 }}"
+        dest: /tmp/common_role_completion.log
+        mode: '0644'
+
+  become: true
+  tags:
+    - packages
+    - common
+
+- name: User management tasks
+  block:
+    - name: Ensure deploy user exists
+      user:
+        name: "{{ deploy_user }}"
+        state: present
+        shell: /bin/bash
+        create_home: yes
+
+    - name: Add deploy user to sudo group
+      user:
+        name: "{{ deploy_user }}"
+        groups: sudo
+        append: yes
+
+  rescue:
+    - name: Handle user creation failure
+      debug:
+        msg: "User creation failed, but continuing..."
+
+  always:
+    - name: Log user management completion
+      copy:
+        content: "User management completed at {{ ansible_date_time.iso8601 }}"
+        dest: /tmp/user_management_completion.log
+        mode: '0644'
+
+  become: true
+  tags:
+    - users
+    - common
+
+- name: Set timezone
+  timezone:
+    name: "{{ system_timezone }}"
+  become: true
+  tags:
+    - common
+    - config
