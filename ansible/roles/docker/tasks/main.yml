@@ -2,9 +2,13 @@
 # Docker role - Docker installation with blocks and tags (Lab 6 Task 1)
 
 - name: Install Docker prerequisites
+  become: true
+  tags:
+    - docker_install
+    - docker
   block:
     - name: Install Docker dependencies
-      apt:
+      ansible.builtin.apt:
         name:
           - apt-transport-https
           - ca-certificates
@@ -12,54 +16,53 @@
           - gnupg
           - lsb-release
         state: present
-        update_cache: yes
+        update_cache: true
 
     - name: Create keyrings directory
-      file:
+      ansible.builtin.file:
         path: /etc/apt/keyrings
         state: directory
         mode: '0755'
 
     - name: Add Docker GPG key
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
         keyring: /etc/apt/keyrings/docker.gpg
 
     - name: Add Docker repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
         filename: docker
 
   rescue:
     - name: Handle GPG key failure
-      debug:
+      ansible.builtin.debug:
         msg: "GPG key addition failed, retrying after delay..."
 
     - name: Wait before retry
-      pause:
+      ansible.builtin.pause:
         seconds: 10
 
     - name: Retry apt update
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
 
     - name: Retry Docker GPG key
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
         keyring: /etc/apt/keyrings/docker.gpg
 
+- name: Install Docker packages
   become: true
   tags:
     - docker_install
     - docker
-
-- name: Install Docker packages
   block:
     - name: Install Docker Engine
-      apt:
+      ansible.builtin.apt:
         name:
           - docker-ce
           - docker-ce-cli
@@ -67,10 +70,10 @@
           - docker-buildx-plugin
           - docker-compose-plugin
         state: present
-        update_cache: yes
+        update_cache: true
 
     - name: Install Python Docker library
-      pip:
+      ansible.builtin.pip:
         name:
           - docker
           - docker-compose
@@ -78,32 +81,31 @@
 
   rescue:
     - name: Handle Docker installation failure
-      debug:
+      ansible.builtin.debug:
         msg: "Docker installation failed, check logs"
 
   always:
     - name: Ensure Docker service is enabled and started
-      service:
+      ansible.builtin.service:
         name: docker
         state: started
-        enabled: yes
-
-  become: true
-  tags:
-    - docker_install
-    - docker
+        enabled: true
 
 - name: Configure Docker
+  become: true
+  tags:
+    - docker_config
+    - docker
   block:
     - name: Add user to docker group
-      user:
+      ansible.builtin.user:
         name: "{{ docker_user }}"
         groups: docker
-        append: yes
+        append: true
       notify: restart docker
 
     - name: Create Docker daemon configuration
-      copy:
+      ansible.builtin.copy:
         content: |
           {
             "log-driver": "json-file",
@@ -118,17 +120,12 @@
 
   rescue:
     - name: Handle Docker configuration failure
-      debug:
+      ansible.builtin.debug:
         msg: "Docker configuration failed, using defaults"
 
   always:
     - name: Log Docker installation completion
-      copy:
+      ansible.builtin.copy:
         content: "Docker installed and configured at {{ ansible_date_time.iso8601 }}"
         dest: /tmp/docker_installation_completion.log
         mode: '0644'
-
-  become: true
-  tags:
-    - docker_config
-    - docker

@@ -3,6 +3,7 @@
 ## Overview
 In this lab, I enhanced the Ansible automation with production-ready features:
 - Refactored roles with **blocks** and **tags** for better error handling and selective execution.
+- Fixed over 10 **Ansible Lint** errors, ensuring best practices like FQCN (Fully Qualified Collection Names), proper variable naming, and correct YAML syntax.
 - Upgraded the deployment from `docker run` to **Docker Compose** using Jinja2 templates.
 - Implemented **role dependencies** to ensure correct execution order.
 - Added **wipe logic** with double-gating (variable + tag) for safe resource cleanup.

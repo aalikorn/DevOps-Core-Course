@@ -16,5 +16,5 @@ common_packages:
   - gnupg
   - lsb-release
 
-deploy_user: deploy
-system_timezone: UTC
+common_deploy_user: deploy
+common_system_timezone: UTC

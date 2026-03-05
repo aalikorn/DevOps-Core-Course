@@ -2,79 +2,77 @@
 # Common role - System provisioning with blocks and tags (Lab 6 Task 1)
 
 - name: Install and configure common packages
+  become: true
+  tags:
+    - packages
+    - common
   block:
     - name: Update apt cache
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
         cache_valid_time: 3600
 
     - name: Install common packages
-      apt:
+      ansible.builtin.apt:
         name: "{{ common_packages }}"
         state: present
-        update_cache: yes
+        update_cache: true
 
   rescue:
     - name: Handle apt cache update failure
-      debug:
+      ansible.builtin.debug:
         msg: "Initial apt update failed, attempting fix..."
 
     - name: Fix missing packages
-      command: apt-get update --fix-missing
+      ansible.builtin.command: apt-get update --fix-missing
       changed_when: false
 
     - name: Retry package installation
-      apt:
+      ansible.builtin.apt:
         name: "{{ common_packages }}"
         state: present
 
   always:
     - name: Log package installation completion
-      copy:
+      ansible.builtin.copy:
         content: "Common packages installed at {{ ansible_date_time.iso8601 }}"
         dest: /tmp/common_role_completion.log
         mode: '0644'
 
-  become: true
-  tags:
-    - packages
-    - common
-
 - name: User management tasks
-  block:
-    - name: Ensure deploy user exists
-      user:
-        name: "{{ deploy_user }}"
-        state: present
-        shell: /bin/bash
-        create_home: yes
-
-    - name: Add deploy user to sudo group
-      user:
-        name: "{{ deploy_user }}"
-        groups: sudo
-        append: yes
-
-  rescue:
-    - name: Handle user creation failure
-      debug:
-        msg: "User creation failed, but continuing..."
-
-  always:
-    - name: Log user management completion
-      copy:
-        content: "User management completed at {{ ansible_date_time.iso8601 }}"
-        dest: /tmp/user_management_completion.log
-        mode: '0644'
-
   become: true
   tags:
     - users
     - common
+  block:
+    - name: Ensure deploy user exists
+      ansible.builtin.user:
+        name: "{{ common_deploy_user }}"
+        state: present
+        shell: /bin/bash
+        create_home: true
+
+    - name: Add deploy user to sudo group
+      ansible.builtin.user:
+        name: "{{ common_deploy_user }}"
+        groups: sudo
+        append: true
+
+  rescue:
+    - name: Handle user creation failure
+      ansible.builtin.debug:
+        msg: "User creation failed, but continuing..."
+
+  always:
+    - name: Log user management completion
+      ansible.builtin.copy:
+        content: "User management completed at {{ ansible_date_time.iso8601 }}"
+        dest: /tmp/user_management_completion.log
+        mode: '0644'
 
 - name: Set timezone
-  timezone:
-    name: "{{ system_timezone }}"
+  ansible.builtin.timezone:
+    name: "{{ common_system_timezone }}"
   become: true
   tags:
     - common
