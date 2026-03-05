@@ -63,10 +63,14 @@ jobs:
 
       - name: Configure SSH
         run: |
+          if [ -z "$SSH_PRIVATE_KEY" ] || [ -z "$VM_HOST" ]; then
+            echo "Error: SSH_PRIVATE_KEY or VM_HOST secret is missing!"
+            exit 1
+          fi
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts || true
 
       - name: Prepare Ansible inventory
         working-directory: ./ansible
@@ -79,17 +83,26 @@ jobs:
       - name: Run provision playbook
         working-directory: ./ansible
         run: |
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass
-          ansible-playbook playbooks/provision.yml \
-            --vault-password-file /tmp/vault_pass
+          if [ -n "$ANSIBLE_VAULT_PASSWORD" ]; then
+            echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass
+            VAULT_OPT="--vault-password-file /tmp/vault_pass"
+          else
+            VAULT_OPT=""
+          fi
+          ansible-playbook playbooks/provision.yml $VAULT_OPT
+          [ -f /tmp/vault_pass ] && rm /tmp/vault_pass
 
       - name: Run deploy playbook
         working-directory: ./ansible
         run: |
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass
-          ansible-playbook playbooks/deploy.yml \
-            --vault-password-file /tmp/vault_pass
-          rm -f /tmp/vault_pass
+          if [ -n "$ANSIBLE_VAULT_PASSWORD" ]; then
+            echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass
+            VAULT_OPT="--vault-password-file /tmp/vault_pass"
+          else
+            VAULT_OPT=""
+          fi
+          ansible-playbook playbooks/deploy.yml $VAULT_OPT
+          [ -f /tmp/vault_pass ] && rm /tmp/vault_pass
 
       - name: Verify deployment
         run: |
