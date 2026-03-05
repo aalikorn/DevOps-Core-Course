@@ -73,9 +73,9 @@ jobs:
         working-directory: ./ansible
         run: |
           cat > inventory/hosts.ini <<EOF
-[webservers]
-target ansible_host=${VM_HOST} ansible_user=${VM_USER}
-EOF
+          [webservers]
+          target ansible_host=${VM_HOST} ansible_user=${VM_USER}
+          EOF
 
       - name: Run provision playbook
         working-directory: ./ansible
