@@ -1,0 +1,16 @@
+---
+# This is an example file. Create the actual file with:
+# ansible-vault create group_vars/all.yml
+#
+# Then add your actual credentials:
+#
+# # Docker Hub credentials
+# dockerhub_username: your-username
+# dockerhub_password: your-access-token
+#
+# # Application configuration
+# app_name: devops-app
+# docker_image: "{{ dockerhub_username }}/devops-info-service"
+# docker_tag: latest
+# app_port: 8000
+# app_internal_port: 8000
