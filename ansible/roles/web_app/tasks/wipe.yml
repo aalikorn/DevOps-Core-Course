@@ -6,12 +6,13 @@
   become: true
   tags:
     - web_app_wipe
+  when: web_app_wipe | default(false) | bool
   block:
     - name: Stop and remove containers with Docker Compose
       community.docker.docker_compose_v2:
         project_src: "{{ web_app_compose_project_dir }}"
         state: absent
-      ignore_errors: true
+      failed_when: false
 
     - name: Remove docker-compose file
       ansible.builtin.file:
@@ -27,11 +28,9 @@
       community.docker.docker_image:
         name: "{{ web_app_docker_image }}:{{ web_app_docker_tag }}"
         state: absent
-      ignore_errors: true
       when: web_app_remove_images | default(false) | bool
+      failed_when: false
 
     - name: Log wipe completion
       ansible.builtin.debug:
         msg: "Application {{ web_app_name }} wiped successfully at {{ ansible_date_time.iso8601 }}"
-
-  when: web_app_wipe | default(false) | bool
