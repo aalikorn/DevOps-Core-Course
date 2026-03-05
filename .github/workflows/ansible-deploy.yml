@@ -40,7 +40,6 @@ jobs:
     name: Deploy with Ansible
     needs: lint
     runs-on: ubuntu-latest
-    if: ${{ secrets.VM_HOST != '' && secrets.VM_USER != '' && secrets.SSH_PRIVATE_KEY != '' && secrets.ANSIBLE_VAULT_PASSWORD != '' }}
 
     env:
       VM_HOST: ${{ secrets.VM_HOST }}
