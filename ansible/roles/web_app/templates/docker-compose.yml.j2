@@ -1,19 +1,19 @@
 version: '3.8'
 
 services:
-  {{ app_name }}:
-    image: {{ docker_image }}:{{ docker_tag }}
-    container_name: {{ app_name }}
+  {{ web_app_name }}:
+    image: {{ web_app_docker_image }}:{{ web_app_docker_tag }}
+    container_name: {{ web_app_name }}
     ports:
-      - "{{ app_port }}:{{ app_internal_port }}"
+      - "{{ web_app_port }}:{{ web_app_internal_port }}"
     environment:
-      - PORT={{ app_internal_port }}
+      - PORT={{ web_app_internal_port }}
       - ENVIRONMENT=production
     restart: unless-stopped
     networks:
       - app_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:{{ app_internal_port }}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:{{ web_app_internal_port }}/health"]
       interval: 30s
       timeout: 10s
       retries: 3

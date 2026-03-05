@@ -9,29 +9,29 @@
   block:
     - name: Stop and remove containers with Docker Compose
       community.docker.docker_compose_v2:
-        project_src: "{{ compose_project_dir }}"
+        project_src: "{{ web_app_compose_project_dir }}"
         state: absent
       ignore_errors: true
 
     - name: Remove docker-compose file
       ansible.builtin.file:
-        path: "{{ compose_project_dir }}/docker-compose.yml"
+        path: "{{ web_app_compose_project_dir }}/docker-compose.yml"
         state: absent
 
     - name: Remove application directory
       ansible.builtin.file:
-        path: "{{ compose_project_dir }}"
+        path: "{{ web_app_compose_project_dir }}"
         state: absent
 
     - name: Remove Docker images (optional)
       community.docker.docker_image:
-        name: "{{ docker_image }}:{{ docker_tag }}"
+        name: "{{ web_app_docker_image }}:{{ web_app_docker_tag }}"
         state: absent
       ignore_errors: true
       when: web_app_remove_images | default(false) | bool
 
     - name: Log wipe completion
       ansible.builtin.debug:
-        msg: "Application {{ app_name }} wiped successfully at {{ ansible_date_time.iso8601 }}"
+        msg: "Application {{ web_app_name }} wiped successfully at {{ ansible_date_time.iso8601 }}"
 
   when: web_app_wipe | default(false) | bool

@@ -24,7 +24,8 @@
         msg: "Initial apt update failed, attempting fix..."
 
     - name: Fix missing packages
-      ansible.builtin.command: apt-get update --fix-missing
+      ansible.builtin.apt:
+        update_cache: true
       changed_when: false
 
     - name: Retry package installation
@@ -71,7 +72,7 @@
         mode: '0644'
 
 - name: Set timezone
-  ansible.builtin.timezone:
+  community.general.timezone:
     name: "{{ common_system_timezone }}"
   become: true
   tags:

@@ -102,7 +102,7 @@
         name: "{{ docker_user }}"
         groups: docker
         append: true
-      notify: restart docker
+      notify: Restart Docker
 
     - name: Create Docker daemon configuration
       ansible.builtin.copy:
@@ -116,7 +116,7 @@
           }
         dest: /etc/docker/daemon.json
         mode: '0644'
-      notify: restart docker
+      notify: Restart Docker
 
   rescue:
     - name: Handle Docker configuration failure
