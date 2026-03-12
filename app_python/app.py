@@ -6,12 +6,21 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from pythonjsonlogger import jsonlogger
+
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Create JSON formatter
+formatter = jsonlogger.JsonFormatter(
+    '%(asctime)s %(levelname)s %(name)s %(module)s %(message)s'
 )
-logger = logging.getLogger(__name__)
+
+# Use StreamHandler
+logHandler = logging.StreamHandler()
+logHandler.setFormatter(formatter)
+logger.addHandler(logHandler)
 
 app = FastAPI(
     title="DevOps Info Service",

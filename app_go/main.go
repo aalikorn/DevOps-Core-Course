@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -72,6 +72,8 @@ func getUptime() (int64, string) {
 }
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Info("Request received", "method", r.Method, "path", r.URL.Path)
+
 	hostname, _ := os.Hostname()
 	uptimeSeconds, uptimeHuman := getUptime()
 
@@ -138,8 +140,11 @@ func main() {
 		host = "0.0.0.0"
 	}
 
-	log.Printf("Starting server on %s:%s", host, port)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
+	slog.Info("Starting server", "host", host, "port", port)
 	if err := http.ListenAndServe(host+":"+port, nil); err != nil {
-		log.Fatal(err)
+		slog.Error("Server failed", "error", err)
 	}
 }
