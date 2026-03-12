@@ -1,0 +1,20 @@
+---
+# Web app role default variables
+
+# Application Configuration
+web_app_name: devops-app
+web_app_docker_image: "{{ dockerhub_username }}/devops-info-service"
+web_app_docker_tag: latest
+web_app_port: 8000
+web_app_internal_port: 8000
+
+# Docker Compose Config
+web_app_compose_project_dir: "/opt/{{ web_app_name }}"
+web_app_docker_compose_version: "3.8"
+
+# Wipe Logic Control (Lab 6 Task 3)
+# Set to true to remove application completely
+# Wipe only:    ansible-playbook deploy.yml -e "web_app_wipe=true" --tags web_app_wipe
+# Clean install: ansible-playbook deploy.yml -e "web_app_wipe=true"
+web_app_wipe: false  # Default: do not wipe
+web_app_remove_images: false  # Set to true to also remove Docker images during wipe

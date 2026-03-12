@@ -1,0 +1,22 @@
+---
+# Web app role metadata and dependencies (Lab 6 Task 2.4)
+
+dependencies:
+  - role: docker
+    # Ensure Docker is installed before deploying web app
+
+galaxy_info:
+  author: DevOps Student
+  description: Web application deployment with Docker Compose
+  company: DevOps Course
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+  galaxy_tags:
+    - docker
+    - web
+    - deployment

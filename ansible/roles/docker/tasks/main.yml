@@ -1,0 +1,131 @@
+---
+# Docker role - Docker installation with blocks and tags (Lab 6 Task 1)
+
+- name: Install Docker prerequisites
+  become: true
+  tags:
+    - docker_install
+    - docker
+  block:
+    - name: Install Docker dependencies
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: true
+
+    - name: Create keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add Docker GPG key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+        keyring: /etc/apt/keyrings/docker.gpg
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+  rescue:
+    - name: Handle GPG key failure
+      ansible.builtin.debug:
+        msg: "GPG key addition failed, retrying after delay..."
+
+    - name: Wait before retry
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Retry apt update
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Retry Docker GPG key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+        keyring: /etc/apt/keyrings/docker.gpg
+
+- name: Install Docker packages
+  become: true
+  tags:
+    - docker_install
+    - docker
+  block:
+    - name: Install Docker Engine
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Install Python Docker library
+      ansible.builtin.pip:
+        name:
+          - docker
+          - docker-compose
+        state: present
+
+  rescue:
+    - name: Handle Docker installation failure
+      ansible.builtin.debug:
+        msg: "Docker installation failed, check logs"
+
+  always:
+    - name: Ensure Docker service is enabled and started
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+- name: Configure Docker
+  become: true
+  tags:
+    - docker_config
+    - docker
+  block:
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: true
+      notify: Restart Docker
+
+    - name: Create Docker daemon configuration
+      ansible.builtin.copy:
+        content: |
+          {
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "10m",
+              "max-file": "3"
+            }
+          }
+        dest: /etc/docker/daemon.json
+        mode: '0644'
+      notify: Restart Docker
+
+  rescue:
+    - name: Handle Docker configuration failure
+      ansible.builtin.debug:
+        msg: "Docker configuration failed, using defaults"
+
+  always:
+    - name: Log Docker installation completion
+      ansible.builtin.copy:
+        content: "Docker installed and configured at {{ ansible_date_time.iso8601 }}"
+        dest: /tmp/docker_installation_completion.log
+        mode: '0644'
