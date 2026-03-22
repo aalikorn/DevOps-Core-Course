@@ -7,6 +7,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from pythonjsonlogger import jsonlogger
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+import time
 
 # Configure logging
 logger = logging.getLogger()
@@ -27,6 +29,57 @@ app = FastAPI(
     description="DevOps course info service",
     version="1.0.0"
 )
+
+# Define Prometheus metrics
+HTTP_REQUESTS_TOTAL = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"]
+)
+
+HTTP_REQUEST_DURATION_SECONDS = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "endpoint"]
+)
+
+HTTP_REQUESTS_IN_PROGRESS = Gauge(
+    "http_requests_in_progress",
+    "HTTP requests currently being processed"
+)
+
+@app.middleware("http")
+async def prometheus_middleware(request: Request, call_next):
+    """Middleware to record Prometheus metrics for each request."""
+    method = request.method
+    path = request.url.path
+    
+    # Track requests in progress
+    HTTP_REQUESTS_IN_PROGRESS.inc()
+    
+    start_time = time.time()
+    try:
+        response = await call_next(request)
+        status_code = str(response.status_code)
+        
+        # Record metrics (success)
+        HTTP_REQUESTS_TOTAL.labels(method=method, endpoint=path, status=status_code).inc()
+        HTTP_REQUEST_DURATION_SECONDS.labels(method=method, endpoint=path).observe(time.time() - start_time)
+        
+        return response
+    except Exception as e:
+        # Record metrics (error)
+        HTTP_REQUESTS_TOTAL.labels(method=method, endpoint=path, status="500").inc()
+        HTTP_REQUEST_DURATION_SECONDS.labels(method=method, endpoint=path).observe(time.time() - start_time)
+        raise e
+    finally:
+        HTTP_REQUESTS_IN_PROGRESS.dec()
+
+@app.get("/metrics")
+async def metrics():
+    """Endpoint to expose Prometheus metrics."""
+    from fastapi.responses import Response
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # Application start time for uptime calculation
 START_TIME = datetime.now(timezone.utc)
