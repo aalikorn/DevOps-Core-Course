@@ -4,6 +4,15 @@
 
 replicaCount: 3
 
+# Secrets configuration
+secrets:
+  enabled: true
+  data:
+    # Placeholder values - override these during deployment
+    DB_USERNAME: "placeholder_user"
+    DB_PASSWORD: "placeholder_pass"
+    API_KEY: "placeholder_key"
+
 image:
   repository: dashnik/devops-info-service
   pullPolicy: IfNotPresent
@@ -16,7 +25,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -115,3 +124,20 @@ strategy:
   rollingUpdate:
     maxSurge: 1
     maxUnavailable: 0
+
+# Vault integration
+vault:
+  enabled: false
+  role: "devops-python-app"
+  secretPath: "secret/data/devops-python-app/config"
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/agent-inject-secret-config: "secret/data/devops-python-app/config"
+    vault.hashicorp.com/role: "devops-python-app"
+  # Template for rendering secrets
+  template: |
+    {{- with secret "secret/data/devops-python-app/config" -}}
+    export DB_USERNAME="{{ .Data.data.username }}"
+    export DB_PASSWORD="{{ .Data.data.password }}"
+    export API_KEY="{{ .Data.data.api_key }}"
+    {{- end -}}
