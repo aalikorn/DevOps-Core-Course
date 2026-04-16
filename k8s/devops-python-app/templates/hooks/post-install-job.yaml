@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "devops-python-app.fullname" . }}-post-install"
+  labels:
+    {{- include "devops-python-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: post-install-hook
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ include "devops-python-app.fullname" . }}-post-install"
+      labels:
+        {{- include "devops-python-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: post-install-hook
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: post-install-job
+        image: curlimages/curl:8.5.0
+        command:
+        - sh
+        - -c
+        - |
+          echo "=========================================="
+          echo "Post-install hook for {{ include "devops-python-app.fullname" . }}"
+          echo "=========================================="
+          echo ""
+          echo "Waiting for service to be ready..."
+          sleep 10
+          echo ""
+          echo "Running smoke tests..."
+          
+          SERVICE_URL="http://{{ include "devops-python-app.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+          
+          echo "Testing health endpoint: $SERVICE_URL/health"
+          if curl -f -s "$SERVICE_URL/health" > /dev/null; then
+            echo "✓ Health check passed"
+          else
+            echo "⚠ Health check failed (service may still be starting)"
+          fi
+          
+          echo ""
+          echo "Post-installation validation completed!"
+          echo "Application {{ include "devops-python-app.fullname" . }} is deployed."
+          echo ""
+          echo "Access your application:"
+          {{- if eq .Values.service.type "NodePort" }}
+          echo "  kubectl port-forward svc/{{ include "devops-python-app.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Release.Namespace }}"
+          {{- else }}
+          echo "  Service type: {{ .Values.service.type }}"
+          {{- end }}

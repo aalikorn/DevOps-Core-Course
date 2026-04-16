@@ -1,0 +1,42 @@
+# Development environment values
+# Override default values for development
+
+replicaCount: 1
+
+image:
+  tag: "latest"
+  pullPolicy: Always
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+service:
+  type: NodePort
+  nodePort: 30080
+
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 3
+  periodSeconds: 5
+
+env:
+  - name: HOST
+    value: "0.0.0.0"
+  - name: PORT
+    value: "5001"
+  - name: DEBUG
+    value: "true"
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 1  # Allow downtime in dev

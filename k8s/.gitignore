@@ -1,0 +1,15 @@
+# Kubernetes generated files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
