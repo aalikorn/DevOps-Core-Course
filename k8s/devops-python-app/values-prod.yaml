@@ -45,12 +45,26 @@ env:
     value: "5001"
   - name: DEBUG
     value: "false"
+  - name: VISITS_FILE
+    value: "/data/visits"
 
 strategy:
   type: RollingUpdate
   rollingUpdate:
     maxSurge: 2
     maxUnavailable: 0  # Zero downtime in production
+
+# ConfigMap overrides for production
+config:
+  appName: "devops-info-service"
+  environment: "production"
+  logLevel: "WARNING"
+
+# Persistence for production
+persistence:
+  enabled: true
+  size: 1Gi
+  accessMode: ReadWriteOnce
 
 # Production-specific pod annotations
 podAnnotations:

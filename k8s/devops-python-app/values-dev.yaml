@@ -34,9 +34,23 @@ env:
     value: "5001"
   - name: DEBUG
     value: "true"
+  - name: VISITS_FILE
+    value: "/data/visits"
 
 strategy:
   type: RollingUpdate
   rollingUpdate:
     maxSurge: 1
     maxUnavailable: 1  # Allow downtime in dev
+
+# ConfigMap overrides for dev
+config:
+  appName: "devops-info-service"
+  environment: "development"
+  logLevel: "DEBUG"
+
+# Persistence for dev
+persistence:
+  enabled: true
+  size: 50Mi
+  accessMode: ReadWriteOnce

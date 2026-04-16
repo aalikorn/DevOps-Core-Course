@@ -16,6 +16,8 @@ spec:
   template:
     metadata:
       annotations:
+        # Trigger pod restart when ConfigMap changes (hot reload)
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- if .Values.vault.enabled }}
         {{- range $key, $value := .Values.vault.annotations }}
         {{ $key }}: {{ $value | quote }}
@@ -53,11 +55,21 @@ spec:
           {{- if .Values.env }}
           {{- toYaml .Values.env | nindent 10 }}
           {{- end }}
-        {{- if and .Values.secrets.enabled (not .Values.vault.enabled) }}
+        {{- end }}
         envFrom:
+        - configMapRef:
+            name: {{ include "devops-python-app.fullname" . }}-env
+        {{- if and .Values.secrets.enabled (not .Values.vault.enabled) }}
         - secretRef:
             name: {{ include "devops-python-app.fullname" . }}-secret
         {{- end }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+          readOnly: true
+        {{- if .Values.persistence.enabled }}
+        - name: data-volume
+          mountPath: /data
         {{- end }}
         livenessProbe:
           {{- toYaml .Values.livenessProbe | nindent 10 }}
@@ -65,6 +77,15 @@ spec:
           {{- toYaml .Values.readinessProbe | nindent 10 }}
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ include "devops-python-app.fullname" . }}-config
+      {{- if .Values.persistence.enabled }}
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: {{ include "devops-python-app.fullname" . }}-data
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

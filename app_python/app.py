@@ -2,6 +2,8 @@ import os
 import socket
 import platform
 import logging
+import threading
+from pathlib import Path
 from datetime import datetime, timezone
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -84,6 +86,27 @@ async def metrics():
 # Application start time for uptime calculation
 START_TIME = datetime.now(timezone.utc)
 
+# --- Visits counter ---
+VISITS_FILE = os.getenv("VISITS_FILE", "/data/visits")
+_visits_lock = threading.Lock()
+
+
+def _read_visits() -> int:
+    """Read the current visit count from the persistent file."""
+    try:
+        return int(Path(VISITS_FILE).read_text().strip())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+
+def _write_visits(count: int) -> None:
+    """Atomically write the visit count to the persistent file."""
+    path = Path(VISITS_FILE)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(str(count))
+    tmp.replace(path)
+
 def get_uptime():
     """Calculate the uptime of the application."""
     delta = datetime.now(timezone.utc) - START_TIME
@@ -110,6 +133,11 @@ def get_system_info():
 async def index(request: Request):
     """Main endpoint - returns service and system information."""
     logger.info(f"Request: {request.method} {request.url.path}")
+
+    # Increment persistent visits counter
+    with _visits_lock:
+        count = _read_visits() + 1
+        _write_visits(count)
     
     uptime = get_uptime()
     system_info = get_system_info()
@@ -134,12 +162,21 @@ async def index(request: Request):
             "method": request.method,
             "path": request.url.path
         },
+        "visits": count,
         "endpoints": [
             {"path": "/", "method": "GET", "description": "Service information"},
-            {"path": "/health", "method": "GET", "description": "Health check"}
+            {"path": "/health", "method": "GET", "description": "Health check"},
+            {"path": "/visits", "method": "GET", "description": "Visit counter"}
         ]
     }
     return response_data
+
+
+@app.get("/visits")
+async def visits():
+    """Return the current visit count."""
+    count = _read_visits()
+    return {"visits": count}
 
 @app.get("/health")
 async def health():
