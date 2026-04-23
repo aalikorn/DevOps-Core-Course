@@ -117,6 +117,8 @@ env:
     value: "5001"
   - name: DEBUG
     value: "false"
+  - name: VISITS_FILE
+    value: "/data/visits"
 
 # Strategy for rolling updates
 strategy:
@@ -124,6 +126,19 @@ strategy:
   rollingUpdate:
     maxSurge: 1
     maxUnavailable: 0
+
+# ConfigMap configuration (injected as environment variables via envFrom)
+config:
+  appName: "devops-info-service"
+  environment: "production"
+  logLevel: "INFO"
+
+# Persistent Volume configuration
+persistence:
+  enabled: true
+  size: 100Mi
+  accessMode: ReadWriteOnce
+  # storageClass: ""  # Use default storage class
 
 # Vault integration
 vault:

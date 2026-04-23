@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  app_python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_python
+    ports:
+      - "5001:5001"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5001
+      - DEBUG=false
+      - VISITS_FILE=/data/visits
+    volumes:
+      - ./data:/data
+    restart: unless-stopped

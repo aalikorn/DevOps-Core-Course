@@ -24,6 +24,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Ensure the non-root user owns the files
 COPY --chown=appuser:appgroup app.py .
 
+# Create data directory for persistent visits counter
+RUN mkdir -p /data && chown appuser:appgroup /data
+
 # Switch to the non-root user
 USER appuser
 
