@@ -386,11 +386,6 @@ ArgoCD polls Git every 3 minutes by default. You can also:
    - Configuration drift test
    - Explanation of behaviors
 
-5. **Screenshots**
-   - ArgoCD UI showing both applications
-   - Sync status
-   - Application details view
-
 ---
 
 ## Bonus Task — ApplicationSet (2.5 pts)
