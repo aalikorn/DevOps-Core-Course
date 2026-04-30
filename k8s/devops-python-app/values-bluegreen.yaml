@@ -1,0 +1,17 @@
+# values-bluegreen.yaml — Blue-Green deployment override
+# Usage:
+#   helm upgrade --install devops-python-app . \
+#     -f values.yaml -f values-bluegreen.yaml
+
+rollout:
+  enabled: true
+  strategy: "blueGreen"
+  analysisEnabled: false
+
+  blueGreen:
+    autoPromotionEnabled: false   # Manual promotion: kubectl argo rollouts promote <name>
+    scaleDownDelaySeconds: 30
+    previewNodePort: 30081        # Access preview (green) version on this port
+
+# Keep same replicaCount; blue-green needs 2x pods during the switch
+replicaCount: 2
