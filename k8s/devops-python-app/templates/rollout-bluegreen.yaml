@@ -1,6 +1,7 @@
-{{- if not .Values.rollout.enabled }}
-apiVersion: apps/v1
-kind: Deployment
+{{- if .Values.rollout.enabled }}
+{{- if eq .Values.rollout.strategy "blueGreen" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: {{ include "devops-python-app.fullname" . }}
   labels:
@@ -12,22 +13,10 @@ spec:
   selector:
     matchLabels:
       {{- include "devops-python-app.selectorLabels" . | nindent 6 }}
-  strategy:
-    {{- toYaml .Values.strategy | nindent 4 }}
   template:
     metadata:
       annotations:
-        # Trigger pod restart when ConfigMap changes (hot reload)
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.vault.enabled }}
-        {{- range $key, $value := .Values.vault.annotations }}
-        {{ $key }}: {{ $value | quote }}
-        {{- end }}
-        {{- if .Values.vault.template }}
-        vault.hashicorp.com/agent-inject-template-config: |
-{{ .Values.vault.template | indent 10 }}
-        {{- end }}
-        {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -51,11 +40,9 @@ spec:
         - name: http
           containerPort: {{ .Values.service.targetPort }}
           protocol: TCP
-        {{- if or .Values.env .Values.secrets.enabled }}
+        {{- if .Values.env }}
         env:
-          {{- if .Values.env }}
           {{- toYaml .Values.env | nindent 10 }}
-          {{- end }}
         {{- end }}
         envFrom:
         - configMapRef:
@@ -99,4 +86,18 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  strategy:
+    blueGreen:
+      # The active service routes production traffic (blue)
+      activeService: {{ include "devops-python-app.fullname" . }}
+      # The preview service routes to the new version (green) for testing
+      previewService: {{ include "devops-python-app.fullname" . }}-preview
+      # Manual promotion: set to true to auto-promote after autoPromotionSeconds
+      autoPromotionEnabled: {{ .Values.rollout.blueGreen.autoPromotionEnabled }}
+      {{- if .Values.rollout.blueGreen.autoPromotionSeconds }}
+      autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds }}
+      {{- end }}
+      # Keep the old ReplicaSet running until scaleDownDelay after promotion
+      scaleDownDelaySeconds: {{ .Values.rollout.blueGreen.scaleDownDelaySeconds | default 30 }}
+{{- end }}
 {{- end }}
