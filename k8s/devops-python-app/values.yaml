@@ -140,6 +140,34 @@ persistence:
   accessMode: ReadWriteOnce
   # storageClass: ""  # Use default storage class
 
+# ────────────────────────────────────────────────────────────
+# Argo Rollouts — Progressive Delivery
+# ────────────────────────────────────────────────────────────
+rollout:
+  # Set to true to use Argo Rollouts instead of a plain Deployment.
+  # When enabled, the Deployment resource is replaced by a Rollout CRD.
+  enabled: false
+
+  # Strategy: "canary" or "blueGreen"
+  strategy: "canary"
+
+  # Enable the AnalysisTemplate for automated promotion/rollback (bonus task)
+  analysisEnabled: false
+
+  # Blue-Green specific settings (only used when strategy: blueGreen)
+  blueGreen:
+    autoPromotionEnabled: false   # true = promote automatically
+    autoPromotionSeconds: 30      # used only if autoPromotionEnabled: true
+    scaleDownDelaySeconds: 30     # how long to keep old (blue) RS after promotion
+    previewNodePort: 30081        # NodePort for the preview service
+
+  # Analysis settings for bonus task
+  analysis:
+    prometheus:
+      enabled: false
+      address: "http://prometheus.monitoring:9090"
+
+# ────────────────────────────────────────────────────────────
 # Vault integration
 vault:
   enabled: false
