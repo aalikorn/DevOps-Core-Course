@@ -1,0 +1,80 @@
+# Monitoring configuration for devops-python-app
+
+# Enable monitoring features
+monitoring:
+  enabled: true
+  
+# Init containers configuration
+initContainers:
+  enabled: true
+
+# StatefulSet configuration for monitoring demo
+statefulset:
+  enabled: true
+  
+# Service configuration
+service:
+  type: NodePort
+  port: 80
+  targetPort: 5001
+  nodePort: 30080
+
+# Replica count for monitoring demo
+replicaCount: 2
+
+# Image configuration
+image:
+  repository: dashnik/devops-info-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  size: 100Mi
+  accessMode: ReadWriteOnce
+
+# Environment variables
+env:
+  - name: HOST
+    value: "0.0.0.0"
+  - name: PORT
+    value: "5001"
+  - name: DEBUG
+    value: "false"
+  - name: VISITS_FILE
+    value: "/data/visits"
+
+# Disable rollout for monitoring demo
+rollout:
+  enabled: false
+
+# Resources for monitoring
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 5001
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 5001
+  initialDelaySeconds: 5
+  periodSeconds: 3
+  timeoutSeconds: 2
+  successThreshold: 1
+  failureThreshold: 3
