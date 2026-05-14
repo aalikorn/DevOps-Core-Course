@@ -1,0 +1,11 @@
+# values-canary.yaml — Canary deployment override
+# Usage:
+#   helm upgrade --install devops-python-app . \
+#     -f values.yaml -f values-canary.yaml
+
+rollout:
+  enabled: true
+  strategy: "canary"
+  analysisEnabled: false         # Set to true to enable automated analysis (bonus)
+
+replicaCount: 3

@@ -1,0 +1,39 @@
+{{- if and .Values.rollout.enabled .Values.rollout.analysisEnabled }}
+# AnalysisTemplate for automated canary promotion/rollback.
+# The analysis runs a web health check against the /health endpoint.
+# If the check fails more than failureLimit times, the rollout is aborted automatically.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ include "devops-python-app.fullname" . }}-success-rate
+  labels:
+    {{- include "devops-python-app.labels" . | nindent 4 }}
+spec:
+  metrics:
+    - name: health-check
+      # Run analysis every 10 seconds, 3 times total; allow at most 1 failure
+      interval: 10s
+      count: 3
+      failureLimit: 1
+      provider:
+        web:
+          url: "http://{{ include \"devops-python-app.fullname\" . }}.{{ .Release.Namespace }}.svc/health"
+          # Expect HTTP 200 with JSON body containing {"status": "ok"}
+          jsonPath: "{$.status}"
+      successCondition: result == "ok"
+  {{- if .Values.rollout.analysis.prometheus.enabled }}
+    - name: error-rate
+      # Prometheus-based error rate check (requires Lab 16 monitoring)
+      interval: 30s
+      count: 5
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: {{ .Values.rollout.analysis.prometheus.address }}
+          query: |
+            sum(rate(http_requests_total{status=~"5.*"}[1m])) /
+            sum(rate(http_requests_total[1m]))
+      # Rollback if error rate exceeds 5%
+      successCondition: result[0] < 0.05
+  {{- end }}
+{{- end }}
