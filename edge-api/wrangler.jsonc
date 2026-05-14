@@ -1,0 +1,31 @@
+{
+  // Cloudflare Workers configuration
+  "name": "edge-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-01-01",
+  
+  // Environment variables (plaintext - not for secrets!)
+  "vars": {
+    "APP_NAME": "edge-api",
+    "COURSE_NAME": "devops-core"
+  },
+  
+  // KV namespace bindings
+  // Create with: npx wrangler kv namespace create SETTINGS
+  // Then add the returned ID here
+  "kv_namespaces": [
+    {
+      "binding": "SETTINGS",
+      "id": "YOUR_KV_NAMESPACE_ID_HERE"
+    }
+  ],
+  
+  // Secrets are managed via CLI:
+  // npx wrangler secret put API_TOKEN
+  // npx wrangler secret put ADMIN_EMAIL
+  
+  // Observability
+  "observability": {
+    "enabled": true
+  }
+}

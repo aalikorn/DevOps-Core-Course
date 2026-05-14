@@ -1,0 +1,9 @@
+# Local development environment variables
+# Copy this file to .dev.vars and fill in your values
+# .dev.vars is gitignored and should never be committed
+
+# These are used for local development with `wrangler dev`
+# In production, use `wrangler secret put` instead
+
+API_TOKEN=your-local-api-token-here
+ADMIN_EMAIL=admin@example.com
