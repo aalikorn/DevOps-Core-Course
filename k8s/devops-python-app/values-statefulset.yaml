@@ -1,0 +1,44 @@
+# Values for StatefulSet deployment
+# This file enables StatefulSet mode with per-pod persistent storage
+
+# Use 3 replicas to demonstrate multiple pods with individual storage
+replicaCount: 3
+
+# Disable rollout mode (mutually exclusive with StatefulSet)
+rollout:
+  enabled: false
+
+# Enable StatefulSet mode
+statefulset:
+  enabled: true
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    # Uncomment for partitioned updates (bonus task)
+    # rollingUpdate:
+    #   partition: 2
+
+# Persistence is required for StatefulSet
+persistence:
+  enabled: true
+  size: 100Mi
+  accessMode: ReadWriteOnce
+  # storageClass: ""  # Use default storage class
+
+# Keep the regular service for external access
+service:
+  type: NodePort
+  port: 80
+  targetPort: 5001
+  nodePort: 30080
+
+# Application environment - visits file stored in per-pod volume
+env:
+  - name: HOST
+    value: "0.0.0.0"
+  - name: PORT
+    value: "5001"
+  - name: DEBUG
+    value: "false"
+  - name: VISITS_FILE
+    value: "/data/visits"
